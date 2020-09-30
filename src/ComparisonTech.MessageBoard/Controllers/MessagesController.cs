@@ -1,10 +1,8 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using ComparisonTech.MessageBoard.Models;
 using ComparisonTech.MessageBoard.Models.DTO;
+using ComparisonTech.MessageBoard.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace ComparisonTech.MessageBoard.Controllers
 {
@@ -12,20 +10,17 @@ namespace ComparisonTech.MessageBoard.Controllers
     [ApiController]
     public class MessagesController : Controller
     {
-        private readonly MessageBoardContext _context;
+        private readonly IMessageService _messageService;
 
-        public MessagesController(MessageBoardContext context)
+        public MessagesController(IMessageService messageService)
         {
-            _context = context;
-            
-            //Used for seeded data in InMemory data
-            _context.Database.EnsureCreated();
+            _messageService = messageService;
         }
         
         [HttpGet("{messageId}")]
         public ActionResult<Message> GetMessage(int messageId)
         {
-            var message = _context.Messages.Find(messageId);
+            var message = _messageService.GetMessage(messageId);
             
             if (message == null) return NotFound(messageId);
             
@@ -33,26 +28,23 @@ namespace ComparisonTech.MessageBoard.Controllers
         }
         
         [HttpGet]
-        public async Task<ActionResult<PaginatedList<Message>>> GetMessages(int daysInPast = 30, int? pageNumber = 1, int pageSize = 5)
+        public async Task<ActionResult<PaginatedList<Message>>> GetMessages([FromQuery]GetMessagesRequest getMessagesRequest)
         {
-            var messages = _context.Messages.Where(m => (DateTime.Now - m.Created).TotalDays < daysInPast);
-
-            return Ok(await PaginatedList<Message>.CreateAsync(messages.AsNoTracking(), pageNumber ?? 1, pageSize));
+            return Ok(await _messageService.GetMessages(getMessagesRequest));
         }
 
         [HttpPost]
         public ActionResult<Message> PostMessage([FromBody]CreateMessageRequest createMessageRequest)
         {
-            var message = new Message
-            {
-                MessageContent = createMessageRequest.MessageContents,
-                Created = DateTime.Now
-            };
+            if (!ModelState.IsValid)
+                return BadRequest();
+            
+            //TODO: use authenticated user
+            var messageCreatedBy = Request.HttpContext.Connection.Id;
 
-            _context.Messages.Add(message);
-            _context.SaveChanges();
-
-            return CreatedAtAction(nameof(GetMessage), new { messageId = message.MessageId }, message);
+            var newMessage = _messageService.CreateMessage(messageCreatedBy, createMessageRequest);
+            
+            return CreatedAtAction(nameof(GetMessage), new { messageId = newMessage.MessageId }, newMessage);
         }
     }
 }

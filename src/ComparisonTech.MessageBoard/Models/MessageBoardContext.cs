@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -14,44 +15,21 @@ namespace ComparisonTech.MessageBoard.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //TODO: Remove test seed data for production
-            modelBuilder.Entity<Message>().HasData(
-                new Message
+            var testUser = "TestUser";
+            var messageList = new List<Message>();
+            
+            for (var i = 1; i < 50; i++)
+            {
+                messageList.Add(new Message
                 {
-                    MessageId = 1,
-                    MessageContent = "Message 1",
-                    Created = DateTime.Now.AddDays(-35)
-                },
-                new Message
-                {
-                    MessageId = 2,
-                    MessageContent = "Message 2",
-                    Created = DateTime.Now.AddDays(-22)
-                },
-                new Message
-                {
-                    MessageId = 3,
-                    MessageContent = "Message 3",
-                    Created = DateTime.Now.AddDays(-10)
-                },
-                new Message
-                {
-                    MessageId = 4,
-                    MessageContent = "Message 4",
-                    Created = DateTime.Now.AddDays(-5)
-                },
-                new Message
-                {
-                    MessageId = 5,
-                    MessageContent = "Message 5",
-                    Created = DateTime.Now.AddDays(-1)
-                },
-                new Message
-                {
-                    MessageId = 6,
-                    MessageContent = "Message 6",
-                    Created = DateTime.Now
-                }
-            );
+                    MessageId = i,
+                    MessageContent = $"Message for MessageId: {i}",
+                    CreatedBy = testUser,
+                    Created = DateTime.Now.AddDays(-(i*2))
+                });
+            }
+            
+            modelBuilder.Entity<Message>().HasData(messageList);
         }
         
         public DbSet<Message> Messages { get; set; }

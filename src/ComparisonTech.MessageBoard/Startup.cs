@@ -1,4 +1,6 @@
+using ComparisonTech.MessageBoard.Data;
 using ComparisonTech.MessageBoard.Models;
+using ComparisonTech.MessageBoard.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -26,11 +28,13 @@ namespace ComparisonTech.MessageBoard
             // Register the Swagger generator
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Comparison Tech Message Board API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = Configuration["ApplicationName"], Version = "v1" });
             });
             
             //TODO: use a real database
-            services.AddDbContext<MessageBoardContext>(options => options.UseInMemoryDatabase("MessageBoard"));
+            services.AddDbContext<MessageBoardContext>(options => options.UseInMemoryDatabase(Configuration["DatabaseName"]));
+            services.AddScoped<IMessageService, MessageService>();
+            services.AddScoped<IMessageBoardRepository, MessageBoardRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -45,7 +49,7 @@ namespace ComparisonTech.MessageBoard
             
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Comparison Tech Message Board API V1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json",  Configuration["ApplicationName"]);
             });
 
             
