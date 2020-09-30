@@ -20,3 +20,5 @@ The data is stored using an in Memory database which is seeded with initial Mess
 - [ ] Expand functionality such as having different Boards and topics that messages can be added to.
 - [ ] Search functionality, maybe with added caching to something like redis or Azure Search or Elastic Search for quick retrieval of messages.
 - [ ] Archiving of old Data
+- [ ] Dockerise the application
+- [ ] Add a front end using framework such as React or Angular, or a mobile application
