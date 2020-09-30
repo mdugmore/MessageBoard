@@ -5,9 +5,10 @@ A simple Message Board Web API.
 # To Run
 
 Use Visual Studio or other IDE to open the solution and build and run.
+
 Or alternatively use the dotnet CLI to run the application.
 
-There is a Swagger UI which you can run the endpoints available.
+There is a Swagger UI which you can run the endpoints available at: https://localhost:5001/swagger/index.html
 
 The data is stored using an in Memory database which is seeded with initial Messages on first call.
 
